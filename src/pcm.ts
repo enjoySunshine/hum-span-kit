@@ -9,6 +9,15 @@
 // Original source:
 // https://github.com/dystopiancode/pcm-g711/blob/master/pcm-g711/g711.c
 
+/**
+ * The single place where a PCM byte count is converted to a duration in seconds. Used both when reading (track
+ * duration, packet duration) and when writing (computing sample durations from packet sizes), so that all of these
+ * durations always agree with one another.
+ */
+export const getPcmDurationInSeconds = (byteCount: number, bytesPerFrame: number, sampleRate: number) => {
+	return byteCount / bytesPerFrame / sampleRate;
+};
+
 export const toUlaw = (s16: number) => {
 	const MULAW_MAX = 0x1FFF;
 	const MULAW_BIAS = 33;

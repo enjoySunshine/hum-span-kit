@@ -14,6 +14,7 @@ import { PacketRetrievalOptions } from '../media-sink';
 import { DEFAULT_TRACK_DISPOSITION, MetadataTags } from '../metadata';
 import { assert, isThenable, UNDETERMINED_LANGUAGE } from '../misc';
 import { EncodedPacket, PLACEHOLDER_DATA } from '../packet';
+import { getPcmDurationInSeconds } from '../pcm';
 import { readAscii, readBytes, Reader, readU16, readU32, readU64 } from '../reader';
 import { ID3_V2_HEADER_SIZE, parseId3V2Tag, readId3V2Header } from '../id3';
 
@@ -459,7 +460,11 @@ class WaveAudioTrackBacking implements InputAudioTrackBacking {
 	async getDurationFromMetadata() {
 		assert(this.demuxer.dataSize !== -1);
 
-		return this.demuxer.dataSize / this.demuxer.audioInfo!.blockSizeInBytes / this.demuxer.audioInfo!.sampleRate;
+		return getPcmDurationInSeconds(
+			this.demuxer.dataSize,
+			this.demuxer.audioInfo!.blockSizeInBytes,
+			this.demuxer.audioInfo!.sampleRate,
+		);
 	}
 
 	async getLiveRefreshInterval() {
@@ -522,7 +527,11 @@ class WaveAudioTrackBacking implements InputAudioTrackBacking {
 		}
 
 		const timestamp = packetIndex * PACKET_SIZE_IN_FRAMES / this.demuxer.audioInfo.sampleRate;
-		const duration = sizeInBytes / this.demuxer.audioInfo.blockSizeInBytes / this.demuxer.audioInfo.sampleRate;
+		const duration = getPcmDurationInSeconds(
+			sizeInBytes,
+			this.demuxer.audioInfo.blockSizeInBytes,
+			this.demuxer.audioInfo.sampleRate,
+		);
 
 		this.demuxer.lastKnownPacketIndex = Math.max(
 			packetIndex,

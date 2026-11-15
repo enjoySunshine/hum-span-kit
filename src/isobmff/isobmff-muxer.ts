@@ -41,6 +41,7 @@ import {
 	validateVideoChunkMetadata,
 } from '../codec';
 import { MAX_ADTS_FRAME_HEADER_SIZE, MIN_ADTS_FRAME_HEADER_SIZE, readAdtsFrameHeader } from '../adts/adts-reader';
+import { getPcmDurationInSeconds } from '../pcm';
 import { FileSlice } from '../reader';
 import { EncodedPacket, PacketType } from '../packet';
 import {
@@ -783,7 +784,7 @@ export class IsobmffMuxer extends Muxer {
 				const frameSize = pcmInfo.sampleSize * trackData.info.numberOfChannels;
 
 				// Compute the precise duration
-				duration = packetData.byteLength / frameSize / trackData.info.sampleRate;
+				duration = getPcmDurationInSeconds(packetData.byteLength, frameSize, trackData.info.sampleRate);
 
 				if (trackData.info.expectedNextPcmPacketTimestamp !== null) {
 					const diff = timestamp - trackData.info.expectedNextPcmPacketTimestamp;
